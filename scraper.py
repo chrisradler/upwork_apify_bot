@@ -3,14 +3,16 @@ import requests
 import json
 import time
 import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Get credentials from environment variables
 APIFY_TOKEN = os.environ.get("APIFY_TOKEN", "apify_api_8HOQdb1OhH5OWM85gKTXNGPEkyz6Le4wuWbX")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "7599920800:AAEc3ZJ6GIHRmSJMFw3hUjaHPoqhcDtGTzw")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "-4779022424")
-client =  ApifyClient(token=APIFY_TOKEN)
-
-# Rest of your script remains the same
+client = ApifyClient(token=APIFY_TOKEN)
 
 # Function to send message to Telegram
 def send_telegram_message(message):
@@ -20,8 +22,23 @@ def send_telegram_message(message):
         "text": message,
         "parse_mode": "HTML"
     }
-    response = requests.post(url, data=payload)
-    return response.json()
+    try:
+        response = requests.post(url, data=payload)
+        result = response.json()
+        if not result.get('ok'):
+            logging.error(f"Telegram error: {result}")
+        return result
+    except Exception as e:
+        logging.error(f"Exception sending Telegram message: {str(e)}")
+        return {"ok": False, "error": str(e)}
+
+# Test Telegram connection
+logging.info("Testing Telegram connection...")
+test_result = send_telegram_message("🔄 Upwork scraper starting...")
+if test_result.get('ok'):
+    logging.info("Telegram connection successful")
+else:
+    logging.error(f"Telegram connection failed: {test_result}")
 
 # Prepare the Actor input with your three URLs
 run_input = {
@@ -36,56 +53,77 @@ run_input = {
 }
 
 # Run the Actor and wait for it to finish
-print("Starting Upwork scraper...")
+logging.info("Starting Upwork scraper...")
 run = client.actor("Cvx9keeu3XbxwYF6J").call(run_input=run_input)
-print(f"Scraping complete. Run ID: {run['id']}")
+logging.info(f"Scraping complete. Run ID: {run['id']}")
 
-# Fetch and send results to Telegram
+# Fetch results
+logging.info("Fetching results from Apify...")
+items = list(client.dataset(run["defaultDatasetId"]).iterate_items())
+logging.info(f"Found {len(items)} items from Apify")
+
+# If no items found, send a notification and exit
+if len(items) == 0:
+    send_telegram_message("⚠️ Upwork scraper ran but found no new job listings")
+    exit(0)
+
+# Send results to Telegram
 job_count = 0
-batch_size = 5  # Number of jobs to send in one message
+batch_size = 2  # Reduced batch size to avoid message length limits
 job_batch = []
 
-for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+for item in items:
     job_count += 1
     
-    # Get skills as a comma-separated list (up to 5 skills)
+    # Get skills as a comma-separated list (up to 3 skills)
     skills = []
-    for i in range(0, 5):  # Only include up to 5 skills to keep it concise
+    for i in range(0, 3):  # Only include up to 3 skills to keep it concise
         skill_key = f"skills/{i}"
         if skill_key in item and item[skill_key]:
             skills.append(item[skill_key])
     skills_text = ", ".join(skills) if skills else "No skills listed"
     
+    # Truncate description to avoid message length issues
+    description = item.get('shortBio', 'No description')
+    if description and len(description) > 250:
+        description = description[:247] + "..."
+    
     # Format job details using exact field names from your CSV
     job_details = (
         f"<b>🔹 {item.get('title', 'No title')}</b>\n"
         f"💰 {item.get('budget', 'N/A')} - {item.get('paymentType', '')}\n"
-        f"📝 {item.get('shortBio', 'No description')[:2500]}...\n"
+        f"📝 {description}\n"
         f"🗓️ {item.get('publishedDate', 'N/A')}\n"
         f"🔗 <a href='{item.get('link', '')}'>View Job</a>\n"
     )
     
     job_batch.append(job_details)
     
-    # Send in batches to avoid message length limits
+    # Send in smaller batches to avoid message length limits
     if len(job_batch) >= batch_size:
         try:
             message = f"<b>📋 UPWORK JOB LISTINGS (Batch {job_count//batch_size})</b>\n\n" + "\n\n".join(job_batch)
-            send_telegram_message(message)
-            print(f"Sent batch {job_count//batch_size}")
+            result = send_telegram_message(message)
+            if result.get('ok'):
+                logging.info(f"Sent batch {job_count//batch_size}")
+            else:
+                logging.error(f"Failed to send batch {job_count//batch_size}: {result}")
         except Exception as e:
-            print(f"Error sending message: {str(e)}")
+            logging.error(f"Error sending message: {str(e)}")
         job_batch = []
-        time.sleep(1)  # Avoid hitting Telegram rate limits
+        time.sleep(2)  # Increased delay to avoid rate limits
 
 # Send any remaining jobs
 if job_batch:
     try:
         message = f"<b>📋 UPWORK JOB LISTINGS (Final Batch)</b>\n\n" + "\n\n".join(job_batch)
-        send_telegram_message(message)
-        print("Sent final batch")
+        result = send_telegram_message(message)
+        if result.get('ok'):
+            logging.info("Sent final batch")
+        else:
+            logging.error(f"Failed to send final batch: {result}")
     except Exception as e:
-        print(f"Error sending final message: {str(e)}")
+        logging.error(f"Error sending final message: {str(e)}")
 
 # Send summary message
 send_telegram_message(f"✅ Scraping complete! Found {job_count} job listings matching your criteria.")
