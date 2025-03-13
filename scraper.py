@@ -89,15 +89,20 @@ for item in items:
         description = description[:247] + "..."
     
     # Format job details using exact field names from your CSV
-    job_details = (
-        f"<b>🔹 {item.get('title', 'No title')}</b>\n"
-        f"💰 {item.get('budget', 'N/A')} - {item.get('paymentType', '')}\n"
-        f"📝 {description}\n"
-        f"🗓️ {item.get('publishedDate', 'N/A')}\n"
-        f"🔗 <a href='{item.get('link', '')}'>View Job</a>\n"
-    )
-    
-    job_batch.append(job_details)
+    if "hour" not in item.get('publishedDate', ''):
+        job_details = (
+            f"<b>🔹 {item.get('title', 'No title')}</b>\n"
+            f"💰 {item.get('budget', 'N/A')} - {item.get('paymentType', '')}\n"
+            f"📝 {description}\n"
+            f"🗓️ {item.get('publishedDate', 'N/A')}\n"
+            f"🔗 <a href='{item.get('link', '')}'>View Job</a>\n"
+        )
+        
+        job_batch.append(job_details)
+    else:
+        message = f"Job was posted more than an hour ago! Skipping..."
+        logging.info(message)
+
     
     # Send in smaller batches to avoid message length limits
     if len(job_batch) >= batch_size:
