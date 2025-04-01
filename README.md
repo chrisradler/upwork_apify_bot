@@ -23,6 +23,8 @@ This bot periodically scrapes Upwork for the latest AI job opportunities that ma
 - Telegram bot token and chat ID
 - Claude API key (Claude 3.5 Sonnet model)
 - GitHub account (for running GitHub Actions)
+- Apify account
+- Apify actor https://console.apify.com/actors/Cvx9keeu3XbxwYF6J/input
 
 ## Installation
 
