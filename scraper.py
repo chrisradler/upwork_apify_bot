@@ -16,9 +16,6 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 client = ApifyClient(token=APIFY_TOKEN)
 
-# Dictionary to store proposals
-proposals_dict = {}
-
 # Function to generate proposal with Claude
 def generate_proposal_with_claude(job_title, job_description, skills_list, budget):
     """
