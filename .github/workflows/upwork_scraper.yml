@@ -1,9 +1,6 @@
 name: Upwork Scraper
 
 on:
-  # schedule:
-  # - cron: '0 */2 * * 1-5'  # Run every 2 hours mon-fri
-  # workflow_dispatch:     # Allows manual triggering
   schedule:
   - cron: '*/30 13-23 * * 1-5'  # Run every 30 minutes mon-fri from 9am - 7pm est
   workflow_dispatch:     # Allows manual triggering
