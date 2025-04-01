@@ -70,6 +70,11 @@ schedule:
 
 You can adjust this schedule to your preferred frequency and timezone.
 
+You will need to setup github secrets for the APIFY_TOKEN, TELEGRAM_BOT_TOKEN, and TELGRAM_CHAT_ID.
+To do this:
+- Access repository
+- Navigate to secrets and Variables -> Actions -> New Repository Secrets 
+
 ### Search Queries
 
 The search criteria are defined in `scraper.py`. Current criteria include:
