@@ -9,9 +9,9 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Get credentials from environment variables
-APIFY_TOKEN = os.environ.get("APIFY_TOKEN", "apify_api_8HOQdb1OhH5OWM85gKTXNGPEkyz6Le4wuWbX")
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "7599920800:AAEc3ZJ6GIHRmSJMFw3hUjaHPoqhcDtGTzw")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "-4779022424")
+APIFY_TOKEN = os.environ.get("APIFY_TOKEN", "YOUR_APIFY_TOKEN")
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "YOUR_TELEGRAM_CHAT_ID")
 client = ApifyClient(token=APIFY_TOKEN)
 
 # Function to send message to Telegram
