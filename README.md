@@ -15,6 +15,7 @@ This bot periodically scrapes Upwork for the latest AI job opportunities that ma
 - 🤖 Automatically generates customized proposals with Claude AI
 - 🔄 Runs automatically every 30 minutes during business hours (Mon-Fri, 9am-7pm EST)
 - 📱 Sends formatted job notifications and proposals to Telegram
+- ⏰ ONLY Returns job that have been posted in the last hour
 
 ## Requirements
 
@@ -29,35 +30,25 @@ This bot periodically scrapes Upwork for the latest AI job opportunities that ma
 ## Installation
 
 1. Fork this repository
-2. Set up the required secrets in your GitHub repository:
-   - `APIFY_TOKEN`: Your Apify API token
-   - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
-   - `TELEGRAM_CHAT_ID`: The ID of your Telegram chat/channel
-   - `CLAUDE_API_KEY`: Your Anthropic Claude API key
-
-Alternatively, you can use the `.env` file for local development and testing:
-
-```
-# Apify credentials
-APIFY_TOKEN=YOUR_APIFY_TOKEN
-
-# Telegram bot credentials
-TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
-TELEGRAM_CHAT_ID=YOUR_TELEGRAM_CHAT_ID
-
-# Claude API credentials
-CLAUDE_API_KEY=YOUR_CLAUDE_API_KEY
-
-# Optional: Configure proxy if needed
-# PROXY_URL=http://user:pass@proxy.example.com:8080
-
-# Optional: Configure runtime settings
-MAX_RETRIES=3
-RETRY_DELAY=5
-BATCH_SIZE=1
-```
-
-## Configuration
+2. Open up and apify account and subscribe to the actor arlusm/upwork-scraper-with-fresh-job-posts 
+    - https://console.apify.com/actors/Cvx9keeu3XbxwYF6J/input to sign in
+    - Create a new api key. Settings -> API & Integrations
+    - Add api key to the .env file and as defualt values (not necessary) in scraper.py
+3. Setup telegram bot:
+    - Open Telegram and search for "@BotFather"
+    - Start a chat with BotFather and send the command /newbot
+    - Follow  the prompts to name your bot and create a username (must end with "bot")
+    - BotFather will give you an API token (keep this secure!) 
+    - Make sure to message the chat to initialize it
+4. Set up the required secrets in your GitHub repository (YOUR_APIFY_TOKEN, YOUR_TELEGRAM_BOT_TOKEN,       YOUR_TELEGRAM_CHAT_ID):
+    - Access repository
+    - Navigate to secrets and Variables -> Actions -> New Repository Secrets -> Enter your keys
+    - Make sure your repository is private so you do not leak any secrets!
+5. Enable Github Actions:
+    - Access repository
+    - Settings -> Actions -> General -> Allow all actions and reusable workflows
+6. Adjust the system prompt to your use case. Line 30 in scraper.py
+7. Everything should work and the bot should run every 30 minutes. You can run python3 scraper.py and manually run the bot to test. make sure you have activated the virtual environment. source venv/bin/activate
 
 ### GitHub Workflow
 
@@ -69,16 +60,6 @@ schedule:
 ```
 
 You can adjust this schedule to your preferred frequency and timezone.
-
-You will need to setup github secrets in your own repository for the APIFY_TOKEN, TELEGRAM_BOT_TOKEN, and TELGRAM_CHAT_ID.
-To do this:
-- Access repository
-- Navigate to secrets and Variables -> Actions -> New Repository Secrets
-
-### Enable Github Actions
-- Access repository
-- Settings -> Actions -> General -> Allow all actions and reusable workflows
-
 
 ### Search Queries
 
